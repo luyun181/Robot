@@ -2,12 +2,14 @@ package com.robot.robotcontrol;
 
 import android.app.Application;
 
+import com.tencent.smtt.sdk.QbSdk;
 import com.videogo.openapi.EZOpenSDK;
 
 public class APP extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        QbSdk.initX5Environment(getApplicationContext(),null);
         /** * sdk日志开关，正式发布需要去掉 */
         EZOpenSDK.showSDKLog(true);
     /** * 设置是否支持P2P取流,详见api */

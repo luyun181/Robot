@@ -1,6 +1,7 @@
 package com.robot.robotcontrol.ui.activity.video;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -10,12 +11,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.ezvizuikit.open.EZUIError;
+import com.ezvizuikit.open.EZUIKit;
+import com.ezvizuikit.open.EZUIPlayer;
 import com.gyf.barlibrary.ImmersionBar;
 import com.robot.robotcontrol.R;
 import com.robot.robotcontrol.bean.CommonBean;
 import com.robot.robotcontrol.interf.ApiService;
 import com.robot.robotcontrol.utils.RetrofitUtils;
 import com.robot.robotcontrol.widget.CustomProgressDialog;
+
+import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,7 +43,7 @@ public class VideoDetailActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.web_view)
-    WebView webView;
+    EZUIPlayer webView;
     @BindView(R.id.btn_stop)
     ImageView btnStop;
     @BindView(R.id.btn_top)
@@ -60,6 +66,7 @@ public class VideoDetailActivity extends AppCompatActivity {
     ImageView tvZoomOut;
     private int type = 0;
     private int speed = 0;
+    private String video_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,14 +80,70 @@ public class VideoDetailActivity extends AppCompatActivity {
                 .navigationBarWithKitkatEnable(false)
                 .statusBarDarkFont(false, 0.2f)
                 .init();
+        Intent intent = getIntent();
+        if (intent != null) {
+            Bundle extras = intent.getExtras();
+//            video_id = extras.getString("video_id");
+        }
+        EZUIKit.initWithAppKey(getApplication(), "089c632132ea44b4b4bf82db781b9f8d");
 
-        webView.loadUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
+//设置授权token
+        EZUIKit.setAccessToken("at.38yntmgwabqwwrupbdjr3zrodt9yke04-1hpp1grov8-1h1h1oq-hpusxf4qe");
+
+
+        //设置播放回调callback
+        webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
+            @Override
+            public void onPlaySuccess() {
+
+            }
+
+            @Override
+            public void onPlayFail(EZUIError ezuiError) {
+
+            }
+
+            @Override
+            public void onVideoSizeChange(int i, int i1) {
+
+            }
+
+            @Override
+            public void onPrepared() {
+//                开始播放
+                webView.startPlay();
+            }
+
+            @Override
+            public void onPlayTime(Calendar calendar) {
+
+            }
+
+            @Override
+            public void onPlayFinish() {
+
+            }
+        });
+
+        //设置播放参数
+        webView.setUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
+
+
+//        webView.loadUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        webView.stopPlay();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         ImmersionBar.with(this).destroy();
+        webView.releasePlayer();
     }
 
     @OnClick(R.id.iv_back)
