@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_login)
     public void onViewClicked() {
-        startActivity(new Intent(LoginActivity.this, VideoDetailActivity.class));
+//        startActivity(new Intent(LoginActivity.this, VideoDetailActivity.class));
         String name = etUsername.getText().toString();
         String pwd = etPwd.getText().toString();
         if (StringUtils.isEmpty(name)) {

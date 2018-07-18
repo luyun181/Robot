@@ -83,52 +83,53 @@ public class VideoDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             Bundle extras = intent.getExtras();
-//            video_id = extras.getString("video_id");
+        //            video_id = extras.getString("video_id");
         }
         EZUIKit.initWithAppKey(getApplication(), "089c632132ea44b4b4bf82db781b9f8d");
 
-//设置授权token
-        EZUIKit.setAccessToken("at.38yntmgwabqwwrupbdjr3zrodt9yke04-1hpp1grov8-1h1h1oq-hpusxf4qe");
+    //设置授权token
+        EZUIKit.setAccessToken("at.69hd0n402boegrgh8wrd1ivo1r75sbfo-4u8ewq1u4b-0dluqum-dvffks3jl");
+
 
 
         //设置播放回调callback
-        webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
-            @Override
-            public void onPlaySuccess() {
-
-            }
-
-            @Override
-            public void onPlayFail(EZUIError ezuiError) {
-
-            }
-
-            @Override
-            public void onVideoSizeChange(int i, int i1) {
-
-            }
-
-            @Override
-            public void onPrepared() {
-//                开始播放
-                webView.startPlay();
-            }
-
-            @Override
-            public void onPlayTime(Calendar calendar) {
-
-            }
-
-            @Override
-            public void onPlayFinish() {
-
-            }
-        });
-
+//        webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
+//            @Override
+//            public void onPlaySuccess() {
+//
+//            }
+//
+//            @Override
+//            public void onPlayFail(EZUIError ezuiError) {
+//
+//            }
+//
+//            @Override
+//            public void onVideoSizeChange(int i, int i1) {
+//
+//            }
+//
+//            @Override
+//            public void onPrepared() {
+//                webView.cancelLongPress();
+////                开始播放
+//                webView.startPlay();
+//            }
+//
+//            @Override
+//            public void onPlayTime(Calendar calendar) {
+//
+//            }
+//
+//            @Override
+//            public void onPlayFinish() {
+//
+//            }
+//        });
         //设置播放参数
-        webView.setUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
+        webView.setUrl("ezopen://open.ys7.com/C12757580/1.live");
 
-
+        webView.startPlay();
 //        webView.loadUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
 
     }
