@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.ezvizuikit.open.EZUIError;
 import com.ezvizuikit.open.EZUIKit;
@@ -19,9 +20,16 @@ import com.ezvizuikit.open.EZUIPlayer;
 import com.gyf.barlibrary.ImmersionBar;
 import com.robot.robotcontrol.R;
 import com.robot.robotcontrol.bean.CommonBean;
+import com.robot.robotcontrol.bean.TokenBean;
+import com.robot.robotcontrol.bean.UrlBean;
+import com.robot.robotcontrol.event.NetSuccessEvent;
 import com.robot.robotcontrol.interf.ApiService;
 import com.robot.robotcontrol.utils.RetrofitUtils;
 import com.robot.robotcontrol.widget.CustomProgressDialog;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Calendar;
 
@@ -68,7 +76,11 @@ public class VideoDetailActivity extends AppCompatActivity {
     ImageView tvZoomOut;
     private int type = 0;
     private int speed = 0;
+    private String token;
     private String video_id;
+    private ApiService apiService;
+    private String ezopen;
+    private String ezopeNhd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,19 +94,20 @@ public class VideoDetailActivity extends AppCompatActivity {
                 .navigationBarWithKitkatEnable(false)
                 .statusBarDarkFont(false, 0.2f)
                 .init();
+        apiService = RetrofitUtils.getInstance(this).create(ApiService.class);
         Intent intent = getIntent();
         if (intent != null) {
             Bundle extras = intent.getExtras();
-        //            video_id = extras.getString("video_id");
+            token = extras.getString("token");
+            video_id = extras.getString("video_id");
+            ezopen = extras.getString("ezopen");
+            ezopeNhd = extras.getString("ezopeNhd");
         }
-        webView.setLoadingView(initProgressBar());
+
+
         EZUIKit.initWithAppKey(getApplication(), "089c632132ea44b4b4bf82db781b9f8d");
-
-    //设置授权token
-        EZUIKit.setAccessToken("at.522ojfnkati6x9mp4kvx56tw3ee35yp0-3np3pttain-0v5t4s6-uqqbpzuoa");
-
-
-
+        EZUIKit.setAccessToken(token);
+        webView.setLoadingView(initProgressBar());
         //设置播放回调callback
         webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
             @Override
@@ -114,9 +127,8 @@ public class VideoDetailActivity extends AppCompatActivity {
 
             @Override
             public void onPrepared() {
-                webView.cancelLongPress();
 //                开始播放
-                webView.startPlay();
+//                webView.startPlay();
             }
 
             @Override
@@ -130,12 +142,12 @@ public class VideoDetailActivity extends AppCompatActivity {
             }
         });
         //设置播放参数
-        webView.setUrl("ezopen://open.ys7.com/C12757580/1.live");
-
+        webView.setUrl(ezopen);
         webView.startPlay();
-//        webView.loadUrl("http://47.95.243.112:3432/Live?id=001&password=12345678&deviceSerial=C12757580&definition=0");
-
     }
+
+
+
 
     @Override
     protected void onStop() {
@@ -156,13 +168,15 @@ public class VideoDetailActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         relativeLayout.setLayoutParams(lp);
-        RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         rlp.addRule(RelativeLayout.CENTER_IN_PARENT);//addRule参数对应RelativeLayout XML布局的属性
         ProgressBar mProgressBar = new ProgressBar(this);
         mProgressBar.setIndeterminateDrawable(getResources().getDrawable(R.drawable.progress));
-        relativeLayout.addView(mProgressBar,rlp);
+        relativeLayout.addView(mProgressBar, rlp);
         return relativeLayout;
     }
+
+
 
     @OnClick({R.id.btn_stop, R.id.btn_top, R.id.btn_right, R.id.btn_bottom,
             R.id.btn_left, R.id.tv_slow, R.id.tv_normal, R.id.tv_fast, R.id.tv_zoom_in, R.id.tv_zoom_out, R.id.iv_back})
@@ -172,43 +186,46 @@ public class VideoDetailActivity extends AppCompatActivity {
                 onBackPressed();
                 break;
             case R.id.btn_stop:
-                stop("C12757580", type);
+                stop(video_id, type);
                 break;
             case R.id.btn_top:
                 type = 0;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
             case R.id.btn_right:
                 type = 3;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
             case R.id.btn_bottom:
                 type = 1;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
             case R.id.btn_left:
                 type = 2;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
             case R.id.tv_slow:
                 speed = 0;
+                ToastUtils.showLong("慢速");
                 break;
             case R.id.tv_normal:
                 speed = 1;
+                ToastUtils.showLong("正常");
                 break;
             case R.id.tv_fast:
                 speed = 2;
+                ToastUtils.showLong("快速");
                 break;
             case R.id.tv_zoom_in:
                 type = 8;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
             case R.id.tv_zoom_out:
                 type = 9;
-                control("C12757580", type, speed);
+                control(video_id, type, speed);
                 break;
-                default:
-                    break;
+            default:
+                break;
         }
     }
 

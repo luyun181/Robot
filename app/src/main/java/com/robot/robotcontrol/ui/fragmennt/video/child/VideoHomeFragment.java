@@ -19,7 +19,10 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.robot.robotcontrol.R;
 import com.robot.robotcontrol.adapter.VIdeoAdapter;
 import com.robot.robotcontrol.base.BaseFragment;
+import com.robot.robotcontrol.bean.TokenBean;
+import com.robot.robotcontrol.bean.UrlBean;
 import com.robot.robotcontrol.bean.VideoListBean;
+import com.robot.robotcontrol.event.NetSuccessEvent;
 import com.robot.robotcontrol.interf.ApiService;
 import com.robot.robotcontrol.ui.activity.login.LoginActivity;
 import com.robot.robotcontrol.ui.activity.video.VideoDetailActivity;
@@ -59,6 +62,8 @@ public class VideoHomeFragment extends BaseFragment {
     @BindView(R.id.ticket)
     LinearLayout ticket;
     Unbinder unbinder;
+    private ApiService apiService;
+    private String tokenBeanData;
 
     public static VideoHomeFragment newInstance() {
 
@@ -75,6 +80,7 @@ public class VideoHomeFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.ticket_fragment_home, container, false);
         unbinder = ButterKnife.bind(this, view);
         toolbarTitle.setText("设备");
+        apiService = RetrofitUtils.getInstance(_mActivity).create(ApiService.class);
         recyclerVideo.setLayoutManager(new LinearLayoutManager(_mActivity));
 
         getVideoList();
@@ -83,7 +89,7 @@ public class VideoHomeFragment extends BaseFragment {
 
     private void getVideoList() {
         final Dialog dialog = CustomProgressDialog.createLoadingDialog(_mActivity,"");
-        ApiService apiService = RetrofitUtils.getInstance(_mActivity).create(ApiService.class);
+
         Observable<VideoListBean> videoList = apiService.getVideoList();
         videoList.subscribeOn(Schedulers.newThread()).unsubscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -108,9 +114,8 @@ public class VideoHomeFragment extends BaseFragment {
                                     String deviceSerial = dataBean.getDeviceSerial();
                                     int status = dataBean.getStatus();
                                     if (status==1){
-                                        Intent intent = new Intent(_mActivity, VideoDetailActivity.class);
-                                        intent.putExtra("video_id",deviceSerial);
-                                        startActivity(intent);
+                                        getToken(deviceSerial);
+
                                     }else {
                                         ToastUtils.showLong("设备不在线");
                                     }
@@ -172,5 +177,79 @@ public class VideoHomeFragment extends BaseFragment {
         super.onDestroy();
         //注销eventbus
         EventBus.getDefault().unregister(this);
+    }
+
+    private void getUrl(final String video_id) {
+        final Dialog dialog= CustomProgressDialog.createLoadingDialog(_mActivity,"");
+        Observable<UrlBean> url = apiService.getUrl(video_id);
+        url.subscribeOn(Schedulers.newThread()).unsubscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UrlBean>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        dialog.show();
+                    }
+
+                    @Override
+                    public void onNext(UrlBean urlBean) {
+                        String code = urlBean.getCode();
+                        if ("200".equals(code)) {
+                            UrlBean.DataBean data = urlBean.getData();
+                            String ezopen = data.getEZOPEN();
+                            String ezopeNhd = data.getEZOPENhd();
+                            Intent intent = new Intent(_mActivity, VideoDetailActivity.class);
+                            intent.putExtra("token",tokenBeanData);
+                            intent.putExtra("ezopen",ezopen);
+                            intent.putExtra("video_id",video_id);
+                            intent.putExtra("ezopeNhd",ezopeNhd);
+                            startActivity(intent);
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        ToastUtils.showLong(R.string.net_error);
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                    }
+                });
+    }
+    private void getToken(final String video_id) {
+
+        Observable<TokenBean> token = apiService.getToken();
+        token.subscribeOn(Schedulers.newThread()).unsubscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<TokenBean>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(TokenBean tokenBean) {
+                        String coda = tokenBean.getCoda();
+                        if ("200".equals(coda)) {
+                            tokenBeanData = tokenBean.getData();
+                            if (tokenBeanData != null) {
+                                getUrl(video_id);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        ToastUtils.showLong(R.string.net_error);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }
