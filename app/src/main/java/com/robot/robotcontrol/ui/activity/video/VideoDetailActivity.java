@@ -2,12 +2,14 @@ package com.robot.robotcontrol.ui.activity.video;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
@@ -85,47 +87,48 @@ public class VideoDetailActivity extends AppCompatActivity {
             Bundle extras = intent.getExtras();
         //            video_id = extras.getString("video_id");
         }
+        webView.setLoadingView(initProgressBar());
         EZUIKit.initWithAppKey(getApplication(), "089c632132ea44b4b4bf82db781b9f8d");
 
     //设置授权token
-        EZUIKit.setAccessToken("at.69hd0n402boegrgh8wrd1ivo1r75sbfo-4u8ewq1u4b-0dluqum-dvffks3jl");
+        EZUIKit.setAccessToken("at.522ojfnkati6x9mp4kvx56tw3ee35yp0-3np3pttain-0v5t4s6-uqqbpzuoa");
 
 
 
         //设置播放回调callback
-//        webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
-//            @Override
-//            public void onPlaySuccess() {
-//
-//            }
-//
-//            @Override
-//            public void onPlayFail(EZUIError ezuiError) {
-//
-//            }
-//
-//            @Override
-//            public void onVideoSizeChange(int i, int i1) {
-//
-//            }
-//
-//            @Override
-//            public void onPrepared() {
-//                webView.cancelLongPress();
-////                开始播放
-//                webView.startPlay();
-//            }
-//
-//            @Override
-//            public void onPlayTime(Calendar calendar) {
-//
-//            }
-//
-//            @Override
-//            public void onPlayFinish() {
-//
-//            }
-//        });
+        webView.setCallBack(new EZUIPlayer.EZUIPlayerCallBack() {
+            @Override
+            public void onPlaySuccess() {
+
+            }
+
+            @Override
+            public void onPlayFail(EZUIError ezuiError) {
+
+            }
+
+            @Override
+            public void onVideoSizeChange(int i, int i1) {
+
+            }
+
+            @Override
+            public void onPrepared() {
+                webView.cancelLongPress();
+//                开始播放
+                webView.startPlay();
+            }
+
+            @Override
+            public void onPlayTime(Calendar calendar) {
+
+            }
+
+            @Override
+            public void onPlayFinish() {
+
+            }
+        });
         //设置播放参数
         webView.setUrl("ezopen://open.ys7.com/C12757580/1.live");
 
@@ -147,8 +150,18 @@ public class VideoDetailActivity extends AppCompatActivity {
         webView.releasePlayer();
     }
 
-    @OnClick(R.id.iv_back)
-    public void onViewClicked() {
+    private View initProgressBar() {
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setBackgroundColor(Color.parseColor("#000000"));
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        relativeLayout.setLayoutParams(lp);
+        RelativeLayout.LayoutParams rlp=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+        rlp.addRule(RelativeLayout.CENTER_IN_PARENT);//addRule参数对应RelativeLayout XML布局的属性
+        ProgressBar mProgressBar = new ProgressBar(this);
+        mProgressBar.setIndeterminateDrawable(getResources().getDrawable(R.drawable.progress));
+        relativeLayout.addView(mProgressBar,rlp);
+        return relativeLayout;
     }
 
     @OnClick({R.id.btn_stop, R.id.btn_top, R.id.btn_right, R.id.btn_bottom,
@@ -194,6 +207,8 @@ public class VideoDetailActivity extends AppCompatActivity {
                 type = 9;
                 control("C12757580", type, speed);
                 break;
+                default:
+                    break;
         }
     }
 
